@@ -4,20 +4,26 @@
 dirs=$(find ~/Desktop -type d)
 dirs_conf=$(find ~/.config -type d | sed 's|^|% |')
 
+bookmarks=$(python3 python-bookmarks.py list)
+echo $bookmarks
+
+# Get application entries by using rofi's drun mode to list applications
 #apps=$(find / -name '*.desktop')
 
-apps_share=$(find /usr/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
+apps_share=$(find /usr/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^| ,|')
 
-apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
+apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^| ,|')
 
-apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
+apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^| ,|')
 
 # Combine applications and directories, prefixing apps to identify them
-combined_list=$(echo -e "$dirs\n$apps_share\n$apps_local\n$apps_local_local\n$dirs_conf")
+combined_list=$(echo -e "$dirs\n$bookmarks\n$apps_share\n$apps_local\n$apps_local_local\n$dirs_conf")
 #combined_list=$(echo -e "$dirs\n$apps")
 
 # Use rofi to select an entry from the combined list
-input=$(echo "$combined_list" | rofi -theme style_2-spotlight -dmenu -p "        spotlight :")
+input=$(echo "$combined_list" | rofi -theme $HOME/.config/rofi/launchers/colorful/style_2-spotlight -dmenu -p "        spotlight :")
+
+echo $input
 
 # Check if input starts with a comma
 if [[ "$input" == ,* ]]; then
@@ -32,6 +38,10 @@ elif [[ "$input" == "?"* ]]; then
 elif [[ "$input" == "%"* ]]; then
     conf_dir="${input:2}"
     kitty --working-directory "$conf_dir" &
+elif [[ "$input" == "$"* ]]; then
+    website="${input:2}"
+    bookmarks_url=$(python3 python-bookmarks.py "$website")
+    zen-browser "$bookmarks_url"&
 elif [ -n "$input" ]; then
     kitty --working-directory "$input" &
 fi
