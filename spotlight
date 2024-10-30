@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Get directories from the home directory
+dirs=$(find ~/Desktop -type d)
+
+#apps=$(find / -name '*.desktop')
+
+apps_share=$(find /usr/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|,|')
+
+apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|,|')
+
+apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|,|')
+
+# Combine applications and directories, prefixing apps to identify them
+combined_list=$(echo -e "$dirs\n$apps_share\n$apps_local\n$apps_local_local")
+#combined_list=$(echo -e "$dirs\n$apps")
+
+# Use rofi to select an entry from the combined list
+input=$(echo "$combined_list" | rofi -theme style_2-spotlight -dmenu -p "        Select App or Directory:")
+
+# Check if input starts with a comma
+if [[ "$input" == ,* ]]; then
+    # If input starts with a comma, launch rofi in drun mode for applications
+    app_query="${input:1}"  # Remove the leading comma for app query
+    echo $app_query
+    bash -c "$app_query" &
+elif [[ "$input" == "?"* ]]; then
+    search="${input:1}"
+    echo $search
+    zen-browser "https://www.google.com/search?client=firefox-b-d&q=$search" &
+elif [ -n "$input" ]; then
+    kitty --working-directory "$input" &
+fi
