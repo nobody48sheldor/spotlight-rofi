@@ -10,11 +10,11 @@ echo $bookmarks
 # Get application entries by using rofi's drun mode to list applications
 #apps=$(find / -name '*.desktop')
 
-apps_share=$(find /usr/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^| ,|')
+apps_share=$(find /usr/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
 
-apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^| ,|')
+apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
 
-apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^| ,|')
+apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
 
 # Combine applications and directories, prefixing apps to identify them
 combined_list=$(echo -e "$dirs\n$bookmarks\n$apps_share\n$apps_local\n$apps_local_local\n$dirs_conf")
@@ -28,7 +28,7 @@ echo $input
 # Check if input starts with a comma
 if [[ "$input" == ,* ]]; then
     # If input starts with a comma, launch rofi in drun mode for applications
-    app_query="${input:1}"  # Remove the leading comma for app query
+    app_query="${input:2}"  # Remove the leading comma for app query
     echo $app_query
     bash -c "$app_query" &
 elif [[ "$input" == "?"* ]]; then
