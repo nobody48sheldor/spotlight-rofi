@@ -2,21 +2,22 @@
 
 # Get directories from the home directory
 dirs=$(find ~/Desktop -type d)
+dirs_conf=$(find ~/.config -type d | sed 's|^|% |')
 
 #apps=$(find / -name '*.desktop')
 
-apps_share=$(find /usr/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|,|')
+apps_share=$(find /usr/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
 
-apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|,|')
+apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
 
-apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|,|')
+apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
 
 # Combine applications and directories, prefixing apps to identify them
-combined_list=$(echo -e "$dirs\n$apps_share\n$apps_local\n$apps_local_local")
+combined_list=$(echo -e "$dirs\n$apps_share\n$apps_local\n$apps_local_local\n$dirs_conf")
 #combined_list=$(echo -e "$dirs\n$apps")
 
 # Use rofi to select an entry from the combined list
-input=$(echo "$combined_list" | rofi -theme style_2-spotlight -dmenu -p "        Select App or Directory:")
+input=$(echo "$combined_list" | rofi -theme style_2-spotlight -dmenu -p "        spotlight :")
 
 # Check if input starts with a comma
 if [[ "$input" == ,* ]]; then
@@ -25,9 +26,12 @@ if [[ "$input" == ,* ]]; then
     echo $app_query
     bash -c "$app_query" &
 elif [[ "$input" == "?"* ]]; then
-    search="${input:1}"
+    search="${input:2}"
     echo $search
     zen-browser "https://www.google.com/search?client=firefox-b-d&q=$search" &
+elif [[ "$input" == "%"* ]]; then
+    conf_dir="${input:2}"
+    kitty --working-directory "$conf_dir" &
 elif [ -n "$input" ]; then
     kitty --working-directory "$input" &
 fi
