@@ -17,11 +17,11 @@ apps_local=$(find /usr/local/share/applications -name "*.desktop" | sed 's|.*/||
 apps_local_local=$(find ~/.local/share/applications -name "*.desktop" | sed 's|.*/||; s|\.desktop||; s|^|, |')
 
 # Combine applications and directories, prefixing apps to identify them
-combined_list=$(echo -e "$dirs\n$bookmarks\n$apps_share\n$apps_local\n$apps_local_local\n$dirs_conf")
+combined_list=$(echo -e "~ use ',' for apps\n~ use '% for config dir\n~ use '?' for web searches\n~ use '$' for bookmarks\n~ other will open dir\n$dirs\n$bookmarks\n$apps_share\n$apps_local\n$apps_local_local\n$dirs_conf")
 #combined_list=$(echo -e "$dirs\n$apps")
 
 # Use rofi to select an entry from the combined list
-input=$(echo "$combined_list" | rofi -theme $HOME/.config/rofi/launchers/colorful/style_2-spotlight -dmenu -p "        spotlight :")
+input=$(echo "$combined_list" | rofi -theme style_2-spotlight -dmenu -p "        spotlight :")
 
 echo $input
 
@@ -42,6 +42,8 @@ elif [[ "$input" == "$"* ]]; then
     website="${input:2}"
     bookmarks_url=$(python3 python-bookmarks.py "$website")
     zen-browser "$bookmarks_url"&
+elif [[ "$input" == "~"* ]]; then
+    echo "error"
 elif [ -n "$input" ]; then
     kitty --working-directory "$input" &
 fi
